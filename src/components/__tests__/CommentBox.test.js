@@ -1,54 +1,67 @@
 import React from 'react';
-import { shallow } from 'enzyme';
-import { testStore } from '../../testStore';
+import { mount } from 'enzyme';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
+import { middleware } from '../../store';
+import rootReducer from '../../reducers';
 
 import CommentBox from '../CommentBox';
 
-// we need to connect our test file to Redux store
-// since this is a 'Connected component' which calls Action Creator
-// to dispatch object/data to Redux Store
+// Testing functional components that use useDispatch and useSelector hooks
+// can be slightly different than regular connected component testing.
+// This test setup demonstrates a foolproof way of testing components that works for
+// both kinds of components (components that are using these hooks or connected components).
 
-// NOTE: Passing 'store' as a prop to our Connect Component - CommentBox
-// this is one of the recommended way
-// setup function for dry with default initial state of this Test
-const setup = (initialState = {}) => {
-  // default initial state of our Test Redux Store
-  const store = testStore(initialState); // passing default arg from above
+// NOTE: Avoid using 'redux-mock-store'
+// Because if your reducers fails, the mock-store method will not catch it.
+// Instead use Real Redux Store. Your reducer automatically gets initialized with the correct initial state.
 
-  // dive meaning to get inside of children components
-  // first Enzyme dive method returns/renders react child component of shallow wrapper
-  // in our case, its going to return 'CommentBox' component wrapped with shallow wrapper below, now
-  // to go one level deeper inside of CommentBox component to access 'html' elements,
-  // we need to dive one more time, add one more dive()
+// our component depends on the redux store, we must also wrap it in a Provider HOC,
+// exported by react-redux. And since the purpose of this tutorial is testing our component fully,
+// including the redux side, we must create a 'mock store' for our redux <Provider /> with
+// an initial state that satisfies the structure of our reducer. Once that’s done,
+// we can render our component using 'mount'
 
-  // NOTE: Enzyme suggests that first connect components to App Redux store &
-  // then use dive methods to access its elements
-  const wrapper = shallow(<CommentBox store={store} />).dive()
-  // console.log(wrapper.debug());
+// 'mount' is Full DOM rendering - Render the parent component & all of its children
+// instead of shallow, we will use Full DOM render method here since we are using react-redux hooks
+// which renders the component & all of its children components too
+// Note: unlike shallow or static rendering, full rendering actually mounts
+// the component in the DOM, which means that tests can affect each other
+// if they are all using the same DOM. Keep that in mind while writing your tests and,
+// if necessary, use .unmount() or something similar as CLEANUP.
+const getWrapper = (
+  mockStore = createStore(rootReducer, {}, applyMiddleware(...middleware))
+) =>
+  mount(
+    <Provider store={mockStore}>
+      <CommentBox />
+    </Provider>
+  )
 
-  return wrapper;
-};
-
-// need to call setup for debugging in console
-// setup();
+// Execution steps - when Jest starts up, for every single test,
+// Jest will execute first - beforeEach func, second - test statement & afterEach func to unmount
+// This process goes again & again for every single test/it statement inside this file
 
 // helper function for code reuse/DRY
 // runs before each of our tests
-// if there's a common code between multiple tests in a single file,
-// we use jest's beforeEach helper func to extract that common logic
-let wrapper;
 
+let wrapper;
 beforeEach(() => {
-  // any logic we put here gets executed before all the tests below
-  // const initialState = { success: true }; NOTE: TO ADD INITIAL STATE FOR TEST
-  wrapper = setup(); // wrapper = setup(initialState);
+  wrapper = getWrapper()
+});
+
+// helper function to unmount or clean up component in the JSDOM
+// after running tests on FULL DOM render method
+afterEach(() => {
+ wrapper.unmount();
 });
 
 test('has a text area and a button', () => {
+  // const wrapper = getWrapper();
   // console.log(wrapper.find("textarea").length);
   // console.log(wrapper.find("button").length);
   expect(wrapper.find('textarea').length).toBe(1);
-  expect(wrapper.find('button').length).toBe(1);
+  expect(wrapper.find('button').length).toBe(2);
 });
 
 // following Steps of Simulating/Faking Events
@@ -63,6 +76,7 @@ test('has a text area and a button', () => {
 
 // making sure the text input is working & storing input values
 test('has a text area that users can type in', () => {
+  // const wrapper = getWrapper();
   // simulate takes first arg -  html name of the DOM event
   // Second arg is the mock event object that will be merged with the event object - (e)
   // & passed to our event handlers - handleChange = e => {}
@@ -90,6 +104,7 @@ test('has a text area that users can type in', () => {
 
 // we need to simulate 'submit event' on the form itself
 test('when form is submitted, text area gets emptied', () => {
+  // const wrapper = getWrapper();
   wrapper
     .find('textarea')
     // mock/fake event object of 'e.target.value' which sets our comment state with value - 'new comment'

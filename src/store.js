@@ -41,3 +41,10 @@ const store = ({ children, initialState = {} }) => {
 };
 
 export default store;
+
+// createStore expects to receive the following arguments
+// 1. reducer (Function)
+// 2. The initial state
+// 3. [enhancer] (Function): The store enhancer. You may optionally specify it to
+// enhance the store with third-party capabilities such as middleware, time travel, persistence, etc.
+// The only store enhancer that ships with Redux is applyMiddleware()
