@@ -28,7 +28,8 @@ import CommentBox from '../CommentBox';
 // Note: unlike shallow or static rendering, full rendering actually mounts
 // the component in the DOM, which means that tests can affect each other
 // if they are all using the same DOM. Keep that in mind while writing your tests and,
-// if necessary, use .unmount() or something similar as CLEANUP.
+// if necessary, use .unmount() or something similar as CLEANUP on our virtual DOM
+// to `unmount our test component` to prevent issues with other components being created inside of other tests. 
 const getWrapper = (
   mockStore = createStore(rootReducer, {}, applyMiddleware(...middleware))
 ) =>
@@ -44,7 +45,6 @@ const getWrapper = (
 
 // helper function for code reuse/DRY
 // runs before each of our tests
-
 let wrapper;
 beforeEach(() => {
   wrapper = getWrapper()

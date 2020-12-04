@@ -59,7 +59,7 @@ test('creates one List element per comment', () => {
 });
 
 // this test is to find bugs while rendering comments
-// enzyme recommended way is to use `render()` method to test HTML output of the component
+// enzyme recommended way is to use `render()` method to test `HTML output` of the component
 // render method returns CheerioWrapper
 // CheerioWrapper is a library like jQuery allows us to run queries over snippets of html
 test('shows the correct text for each comment', () => {
