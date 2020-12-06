@@ -29,7 +29,7 @@ test('shows one CommentBox component', () => {
   // to find CommentBox component inside of our wrapped App component
   // find method returns back an array which contains every instances of CommentBox that was found
   // although we only care about one copy of CommentBox that was created
-  // NOTE: with Find method, we can return React Components & HTML elements
+  // NOTE: with Find method, we can return React Components, HTML elements & CSS selectors as well
   expect(wrapper.find(CommentBox).length).toBe(1);
 })
 
